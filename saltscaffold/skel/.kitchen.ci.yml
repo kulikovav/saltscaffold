@@ -1,0 +1,68 @@
+# vim: ft=yaml foldlevel=2
+<%text>
+<% proxy_vars = {} %>
+<% %w(http_proxy https_proxy no_proxy).each do |envvar| %>
+<%   if ENV.key?(envvar) %>
+<%     proxy_vars[envvar] = ENV[envvar] %>
+<%   end %>
+<% end %>
+</%text>
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+
+provisioner:
+  name: salt_solo
+  is_file_root: false
+  salt_copy_filter:
+    - .git
+  kitchen_root: ../
+  state_collection: ../
+  formula: ${formula_name}
+<%text>
+<% if proxy_vars.size > 0 %>
+  salt_minion_extra_config:
+    proxy_host: <%= URI(@http_proxy).host %>
+    proxy_port: <%= URI(@http_proxy).port %>
+<% end %>
+</%text>
+
+platforms:
+  - name: centos-7.5
+    driver_config:
+      platform: centos
+      run_command: /usr/sbin/init
+<%text>
+<% if proxy_vars.size > 0 %>
+<% %w(http_proxy https_proxy no_proxy).each do |envvar| %>
+<% if ENV.key?(envvar) %>
+      <%= envvar %>: '<%= ENV[envvar] %>'
+<% end %>
+<% end %>
+<% end %>
+</%text>
+      remove_images: true
+      dockerfile: ../../kitchen-helpers/docker/Dockerfile7
+
+suites:
+  - name: default
+    includes:
+      - centos-7.5
+    provisioner:
+      state_top:
+        base:
+          '*':
+            - ${formula_name}
+      pillars-from-files:
+        ${formula_name}.sls: pillar-custom.sls
+      pillars:
+        top.sls:
+          base:
+            '*':
+              - ${formula_name}
+    verifier:
+      name: shell
+      remote_exec: false
+      command: pytest -v test/default

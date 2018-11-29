@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+# vim: ft=jinja
+# This file handles the merging of pillar data with the data from defaults
+
+{# Start with  defaults from defaults.yml #}
+{% import_yaml '${formula_name}/defaults.yml' as default_settings %}
+
+{% set base_settings = salt['grains.filter_by'](
+  default_settings
+  , grain="os_family"
+  , merge=salt['pillar.get']('${formula_name}:lookup')
+  , base='${formula_name}')
+${'%}'}
+
+{# Merge in template:lookup pillar #}
+{% set ${formula_name} = salt['pillar.get'](
+        '${formula_name}',
+        default=base_settings,
+        merge=True
+    )
+${'%}'}

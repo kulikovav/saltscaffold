@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# vim: ft=yaml
+# Defaults for ${formula_name}
+
+${formula_name}:
+  pkg: ${formula_name}
+

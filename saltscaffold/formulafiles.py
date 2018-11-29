@@ -5,28 +5,29 @@ from saltscaffold import formulafolders
 import subprocess
 from mako.template import Template
 
-def create_files(formula_name, formula_root):
+
+
+def create_files(formula_name, states_root):
     """Creates all files for the formula scaffold"""
-    root_dir = formulafolders.create_path(formula_root, formula_name + "-formula")
+    root_dir = formulafolders.create_path(states_root, formula_name)
 
-    write_file(formula_name, root_dir, None, "README.md", " +++")
-    write_file(formula_name, root_dir, None, "LICENSE.txt", " +++")
-    write_file(formula_name, root_dir, None, ".gitignore", " +++")
     write_file(formula_name, root_dir, None, ".kitchen.yml", " +++")
-    write_file(formula_name, root_dir, None, ".kitchen-ci.yml", " +++")
+    write_file(formula_name, root_dir, None, ".kitchen.ci.yml", " +++")
+    write_file(formula_name, root_dir, None, "Jenkinsfile", " +++")
     write_file(formula_name, root_dir, None, "pillar-custom.sls", " +++")
-    write_file(formula_name, root_dir, None, "Gemfile", " +++")
-    write_file(formula_name, root_dir, "formula", "defaults.yml", " +++")
-    write_file(formula_name, root_dir, "formula", "map.jinja", " +++")
-    write_file(formula_name, root_dir, "formula", "init.sls", " +++")
-    write_file(formula_name, root_dir, "formula", "install.sls", " +++")
-    write_file(formula_name, root_dir, "formula", "config.sls", " +++")
-    write_file(formula_name, root_dir, "formula", "service.sls", " +++")
-    write_file(formula_name, root_dir, "formula/files", "config.conf", " +++")
-    write_file(formula_name, root_dir, "test/integration/default/serverspec", "_spec.rb", " +++")
-    write_file(formula_name, root_dir, "test/mockup", "init.sls", " +++")
+    write_file(formula_name, root_dir, None, "defaults.yml", " +++")
+    write_file(formula_name, root_dir, None, "map.jinja", " +++")
+    write_file(formula_name, root_dir, None, "init.sls", " +++")
+    write_file(formula_name, root_dir, None, "install.sls", " +++")
+    write_file(formula_name, root_dir, None, "config.sls", " +++")
+    write_file(formula_name, root_dir, None, "service.sls", " +++")
+    write_file(formula_name, root_dir, "files", "config.conf.jinja", " +++")
+    write_file(formula_name, root_dir, "test/default", "conftest.py", " +++")
+    write_file(formula_name, root_dir, "test/default", "test_pkg.py", " +++")
+    write_file(formula_name, root_dir, "test/default", "test_conf.py", " +++")
+    write_file(formula_name, root_dir, "test/default", "test_service.py", " +++")
 
-def write_file(formula_name, formula_root, sub_dir, file_name, prefix):
+def write_file(formula_name, states_root, sub_dir, file_name, prefix):
     """Writes sample formula file"""
 
     # read in template
@@ -36,13 +37,15 @@ def write_file(formula_name, formula_root, sub_dir, file_name, prefix):
     else:
         out_dir = sub_dir.replace("formula", formula_name)
         template_path = os.path.join(sub_dir, file_name)
-    
     template_prefix = os.path.join(os.path.dirname(__file__), "skel")
     template = Template(filename=os.path.join( template_prefix, template_path))
+    path = get_file_path(states_root, out_dir, file_name)
 
-    path = get_file_path(formula_root, out_dir, file_name)
-    with open(path, "w") as file_out:
-        file_out.write(template.render(formula_name=formula_name))
+    try:
+        with open(path, "w") as file_out:
+            file_out.write(template.render(formula_name=formula_name))
+    except IOError as e:
+        print(e.strerror)
 
     # print output
     print_file(path, prefix)

@@ -4,7 +4,7 @@ from textwrap import dedent
 
 def create_folders(formula_name, current_directory):
     """Creates all the required folders"""
-    root_dir = create_path(current_directory, formula_name + '-formula')
+    root_dir = create_path(current_directory, formula_name)
 
     if os.path.exists(root_dir) and os.listdir(root_dir):
         # if the path exists and isn't empty raise an error
@@ -19,10 +19,8 @@ def create_folders(formula_name, current_directory):
     else:
         make_folder(root_dir) # create the formula root directory
 
-    dirnames = (formula_name, 
-                formula_name + '/files',
-                'test/integration/default/serverspec',
-                'test/mockup/files')
+    dirnames = ('files',
+                'test/default')
 
     # create the rest of the directories needed
     for item in dirnames:

@@ -1,37 +1,54 @@
-# -*- coding: utf-8 -*-
-# vim: ft=yaml
+# vim: ft=yaml foldlevel=2
 ---
 driver:
   name: vagrant
-  customize: 
-    memory: 1024
+  customize:
+    natdnshostresolver1: 'on'
+    memory: 2048
 
 provisioner:
   name: salt_solo
-  is_file_root: true
+  is_file_root: false
   salt_copy_filter:
-    - .kitchen
     - .git
-    - .vagrant
-  state_top:
-    base:
-      "*":
-        - test.mockup
-        - ${formula_name}
+  kitchen_root: ../
+  state_collection: ../
+  formula: ${formula_name}
 
 platforms:
-  - name: bento/debian-8.7
+  - name: centos-7.5
+    driver:
+      provision: true
+      vagrantfiles:
+        - ../../kitchen-helpers/vagrant/centos7.rb
+    provisioner:
+      salt_install: none
+  - name: centos-6.10
+    driver:
+      provision: true
+      vagrantfiles:
+        - ../../kitchen-helpers/vagrant/centos6.rb
+    provisioner:
+      salt_install: none
 
 suites:
   - name: default
-
-  - name: custom
+    includes:
+      - centos-7.5
+      - centos-6.10
     provisioner:
+      state_top:
+        base:
+          '*':
+            - ${formula_name}
       pillars-from-files:
         ${formula_name}.sls: pillar-custom.sls
       pillars:
         top.sls:
           base:
-            "*":
+            '*':
               - ${formula_name}
-
+    verifier:
+      name: shell
+      remote_exec: false
+      command: pytest -v test/default

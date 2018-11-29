@@ -3,5 +3,5 @@
 # Custom Pillar Data for ${formula_name}
 
 ${formula_name}:
-  enabled: false
+  custom_pillar: 'test'
 
