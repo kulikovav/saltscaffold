@@ -23,9 +23,11 @@ provisioner:
   formula: ${formula_name}
 <%text>
 <% if proxy_vars.size > 0 %>
+<% if proxy_vars.key?("http_proxy") %>
   salt_minion_extra_config:
-    proxy_host: <%= URI(@http_proxy).host %>
-    proxy_port: <%= URI(@http_proxy).port %>
+    proxy_host: <%= URI(proxy_vars["http_proxy"]).host %>
+    proxy_port: <%= URI(proxy_vars["http_proxy"]).port %>
+<% end %>
 <% end %>
 </%text>
 
@@ -36,10 +38,8 @@ platforms:
       run_command: /usr/sbin/init
 <%text>
 <% if proxy_vars.size > 0 %>
-<% %w(http_proxy https_proxy no_proxy).each do |envvar| %>
-<% if ENV.key?(envvar) %>
-      <%= envvar %>: '<%= ENV[envvar] %>'
-<% end %>
+<% proxy_vars.each do |k, v| %>
+      <%= k %>: '<%= v %>'
 <% end %>
 <% end %>
 </%text>

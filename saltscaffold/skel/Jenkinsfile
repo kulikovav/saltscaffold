@@ -5,19 +5,19 @@ pipeline {
   stages {
     stage('\u27A1 Install dependencies') {
       steps {
-        sh 'rbenv local 2.5.1-p0 && bundle install --path vendor/bundle'
+        sh 'source /etc/profile.d/rbenv.sh && bundle install --path vendor/bundle'
         sh 'python3 -m venv venv && source venv/bin/activate'
         sh 'pip install -r test-requirements.txt'
       }
     }
     stage('\u27A1 Verify Kitchen') {
       steps {
-        sh 'cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen list'
+        sh 'source /etc/profile.d/rbenv.sh && cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen list'
       }
     }
     stage('\u27A1 Run test-kitchen') {
       steps {
-          sh 'cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen test -d always default'
+        sh 'source /etc/profile.d/rbenv.sh && cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen test -d always default'
       }
     }
   }
