@@ -4,29 +4,48 @@ pipeline {
   }
   options {
     disableConcurrentBuilds()
+    ansiColor("xterm")
   }
   environment {
     PATH = "/usr/local/rbenv/shims:/usr/local/rbenv/bin:/usr/local/rbenv/libexec:/usr/local/bin:/sbin:/usr/sbin:/bin:/usr/bin"
     RBENV_SHELL = "bash"
     RBENV_ROOT = "/usr/local/rbenv"
     RBENV_VERSION = "2.5.1"
+    VIRTUAL_ENV = "${env.WORKSPACE}/venv"
   }
   stages {
     stage('\u27A1 Install dependencies') {
       steps {
-        sh 'bundle install --path vendor/bundle'
-        sh 'python3 -m venv venv && source venv/bin/activate'
-        sh 'pip install -r test-requirements.txt'
+        sh """
+          bundle install --path vendor/bundle
+          python3 -m venv venv
+          export PATH=${VIRTUAL_ENV}/bin:${PATH}
+          pip install -r test-requirements.txt
+        """
       }
     }
     stage('\u27A1 Verify Kitchen') {
       steps {
-        sh 'cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen list'
+        sh """
+          export PATH=${VIRTUAL_ENV}/bin:${PATH}
+          cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen list
+        """
       }
     }
     stage('\u27A1 Run test-kitchen') {
       steps {
-          sh 'cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen test -d always default'
+        sh """
+          export PATH=${VIRTUAL_ENV}/bin:${PATH}
+          cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen test all
+        """
+      }
+      post {
+        always {
+          sh """
+            export PATH=${VIRTUAL_ENV}/bin:${PATH}
+            cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen destroy all
+          """
+        }
       }
     }
   }

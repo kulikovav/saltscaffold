@@ -22,6 +22,9 @@ provisioner:
     - .kitchen.yml
     - .kitchen.ci.yml
     - .kitchen.local.yml
+    - .bundle
+    - venv
+    - vendor
   kitchen_root: ../
   state_collection: ../
   gpg_home: ../../kitchen-helpers/gpgkeys
