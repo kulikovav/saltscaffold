@@ -11,7 +11,9 @@ pipeline {
     RBENV_SHELL = "bash"
     RBENV_ROOT = "/usr/local/rbenv"
     RBENV_VERSION = "2.5.1"
+<%text>
     VIRTUAL_ENV = "${env.WORKSPACE}/venv"
+</%text>
   }
   stages {
     stage('\u27A1 Install dependencies') {
@@ -19,7 +21,9 @@ pipeline {
         sh """
           bundle install --path vendor/bundle
           python3 -m venv venv
+<%text>
           export PATH=${VIRTUAL_ENV}/bin:${PATH}
+</%text>
           pip install -r test-requirements.txt
         """
       }
@@ -27,7 +31,9 @@ pipeline {
     stage('\u27A1 Verify Kitchen') {
       steps {
         sh """
+<%text>
           export PATH=${VIRTUAL_ENV}/bin:${PATH}
+</%text>
           cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen list
         """
       }
@@ -35,14 +41,18 @@ pipeline {
     stage('\u27A1 Run test-kitchen') {
       steps {
         sh """
+<%text>
           export PATH=${VIRTUAL_ENV}/bin:${PATH}
+</%text>
           cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen test all
         """
       }
       post {
         always {
           sh """
+<%text>
             export PATH=${VIRTUAL_ENV}/bin:${PATH}
+</%text>
             cd states/${formula_name} && KITCHEN_LOCAL_YAML=.kitchen.ci.yml bundle exec kitchen destroy all
           """
         }

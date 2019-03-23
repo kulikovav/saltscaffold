@@ -16,7 +16,7 @@ config = {
     'author': 'Christopher Marzullo',
     'url': 'https://github.com/cmarzullo/saltsaffold',
     'author_email': 'cmarzullo@linode.com',
-    'version': '3.0.5.2019.1.31.1',
+    'version': '3.0.5.2019.3.24.2',
     'install_requires': ['nose','mako'],
     'packages': ['saltscaffold'],
     'package_data': {
